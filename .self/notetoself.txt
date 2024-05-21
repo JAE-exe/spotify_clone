@@ -1,3 +1,2 @@
-https://youtu.be/2aeMRB8LL4o?list=PL9XQFYsNgXev1tChiuItulpoRsH3goj2j&t=1865
-
+https://youtu.be/2aeMRB8LL4o?list=PL9XQFYsNgXev1tChiuItulpoRsH3goj2j&t=2211
 build using : npm run dev

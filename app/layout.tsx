@@ -7,7 +7,7 @@ const font = Figtree({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Spotify Clone",
-  description: "a clone of the most popular music streaming app",
+  description: "a clone of one of the most popular music streaming app",
 };
 
 export default function RootLayout({
