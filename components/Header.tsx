@@ -1,5 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation"; // Correct import for useRouter from next/navigation
+import { HiHome } from "react-icons/hi";
 import { RxCaretLeft, RxCaretRight } from "react-icons/rx";
 import { twMerge } from "tailwind-merge";
 
@@ -33,8 +34,10 @@ const Header: React.FC<HeaderProps> = ({ children, className }) => {
             <RxCaretRight size={35} className="text-white" />
           </button>
         </div>
-        <div className="flex-grow flex items-center justify-center">
-          {children}
+        <div className="flex md:hidden gap-x-2 items-center ">
+          <button>
+            <HiHome />
+          </button>
         </div>
       </div>
     </div>
