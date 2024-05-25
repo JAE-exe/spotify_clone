@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Spotify Clone</h1>
+<h1 align="center" id="title">Spotify Clone(work in progress)</h1>
 
 <p align="center"><img src="https://socialify.git.ci/JAE-exe/spotify_clone/image?font=Jost&amp;language=1&amp;name=1&amp;pattern=Solid&amp;theme=Dark" alt="project-image"></p>
 
