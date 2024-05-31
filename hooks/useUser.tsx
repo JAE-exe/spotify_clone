@@ -14,7 +14,9 @@ type UserContextType = {
   subscription: Subscription | null;
 };
 
-export const UserContext = createContext<UserContextType | undefined>(undefined);
+export const UserContext = createContext<UserContextType | undefined>(
+  undefined
+);
 
 export interface Props {
   children: ReactNode;
@@ -38,17 +40,23 @@ export const MyUserContextProvider = ({ children }: Props) => {
       if (user) {
         setIsLoadingData(true);
         try {
-          const { data: userDetails, error: userDetailsError } = await getUserDetails();
-          const { data: subscription, error: subscriptionError } = await getSubscription();
+          const { data: userDetails, error: userDetailsError } =
+            await getUserDetails();
+          const { data: subscription, error: subscriptionError } =
+            await getSubscription();
 
           if (userDetailsError || subscriptionError) {
-            console.error('Error fetching user details or subscription', userDetailsError, subscriptionError);
+            console.error(
+              "Error fetching user details or subscription",
+              userDetailsError,
+              subscriptionError
+            );
           } else {
             setUserDetails(userDetails);
             setSubscription(subscription);
           }
         } catch (error) {
-          console.error('Error fetching data', error);
+          console.error("Error fetching data", error);
         } finally {
           setIsLoadingData(false);
         }
@@ -58,15 +66,16 @@ export const MyUserContextProvider = ({ children }: Props) => {
     fetchUserDetailsAndSubscription();
   }, [user]);
 
-  const getUserDetails = () => supabase.from('users').select('*').single();
+  const getUserDetails = () => supabase.from("users").select("*").single();
 
   const getSubscription = () =>
-    supabase.from('subscriptions')
-      .select('*, prices(*, products(*))')
-      .in('status', ['trialing', 'active'])
+    supabase
+      .from("subscriptions")
+      .select("*, prices(*, products(*))")
+      .in("status", ["trialing", "active"])
       .single();
 
-  const value = {
+  /*const value = {
     access_token: accessToken,
     user,
     userDetails,
@@ -74,5 +83,28 @@ export const MyUserContextProvider = ({ children }: Props) => {
     subscription,
   };
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;*/
+
+  useEffect(() => {
+    if (user && !isLoadingData && !userDetails && !subscription) {
+      setIsLoadingData(true);
+
+      Promise.allSettled([getUserDetails(), getSubscription()]).then(
+        (results) => {
+          const userDetailsPromise = results[0];
+          const subscriptionPromise = results[1];
+
+          if (userDetailsPromise.status === "fulfilled") {
+            setUserDetails(userDetailsPromise.value.data as UserDetails);
+          }
+
+          if (subscriptionPromise.status === "fulfilled") {
+            setSubscription(subscriptionPromise.value.data as Subscription);
+          }
+
+          setIsLoadingData(false);
+        }
+      );
+    }
+  }, []);
 };
