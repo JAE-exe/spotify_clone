@@ -4,7 +4,7 @@ import {
   useSessionContext,
   useUser as useSupaUser,
 } from "@supabase/auth-helpers-react";
-import { createContext, ReactNode, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
 
 type UserContextType = {
   access_token: string | null;
@@ -35,37 +35,6 @@ export const MyUserContextProvider = ({ children }: Props) => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
 
-  useEffect(() => {
-    const fetchUserDetailsAndSubscription = async () => {
-      if (user) {
-        setIsLoadingData(true);
-        try {
-          const { data: userDetails, error: userDetailsError } =
-            await getUserDetails();
-          const { data: subscription, error: subscriptionError } =
-            await getSubscription();
-
-          if (userDetailsError || subscriptionError) {
-            console.error(
-              "Error fetching user details or subscription",
-              userDetailsError,
-              subscriptionError
-            );
-          } else {
-            setUserDetails(userDetails);
-            setSubscription(subscription);
-          }
-        } catch (error) {
-          console.error("Error fetching data", error);
-        } finally {
-          setIsLoadingData(false);
-        }
-      }
-    };
-
-    fetchUserDetailsAndSubscription();
-  }, [user]);
-
   const getUserDetails = () => supabase.from("users").select("*").single();
 
   const getSubscription = () =>
@@ -75,7 +44,40 @@ export const MyUserContextProvider = ({ children }: Props) => {
       .in("status", ["trialing", "active"])
       .single();
 
-  /*const value = {
+  useEffect(() => {
+    const fetchUserDetailsAndSubscription = async () => {
+      if (user) {
+        setIsLoadingData(true);
+
+        Promise.allSettled([getUserDetails(), getSubscription()]).then(
+          (results) => {
+            const userDetailsPromise = results[0];
+            const subscriptionPromise = results[1];
+
+            if (userDetailsPromise.status === "fulfilled") {
+              setUserDetails(userDetailsPromise.value.data as UserDetails);
+            }
+
+            if (subscriptionPromise.status === "fulfilled") {
+              setSubscription(subscriptionPromise.value.data as Subscription);
+            }
+
+            setIsLoadingData(false);
+          }
+        ).catch((error) => {
+          console.error("Error fetching data", error);
+          setIsLoadingData(false);
+        });
+      } else if (!isLoadingUser) {
+        setUserDetails(null);
+        setSubscription(null);
+      }
+    };
+
+    fetchUserDetailsAndSubscription();
+  }, [user, isLoadingUser]);
+
+  const value = {
     access_token: accessToken,
     user,
     userDetails,
@@ -83,28 +85,14 @@ export const MyUserContextProvider = ({ children }: Props) => {
     subscription,
   };
 
-  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;*/
-
-  useEffect(() => {
-    if (user && !isLoadingData && !userDetails && !subscription) {
-      setIsLoadingData(true);
-
-      Promise.allSettled([getUserDetails(), getSubscription()]).then(
-        (results) => {
-          const userDetailsPromise = results[0];
-          const subscriptionPromise = results[1];
-
-          if (userDetailsPromise.status === "fulfilled") {
-            setUserDetails(userDetailsPromise.value.data as UserDetails);
-          }
-
-          if (subscriptionPromise.status === "fulfilled") {
-            setSubscription(subscriptionPromise.value.data as Subscription);
-          }
-
-          setIsLoadingData(false);
-        }
-      );
-    }
-  }, []);
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
+
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error("useUser must be used within a MyUserContextProvider");
+  }
+  return context;
+}
