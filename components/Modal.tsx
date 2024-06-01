@@ -5,7 +5,7 @@ import { IoMdClose } from "react-icons/io";
 export default () => (
   
     <Dialog.Trigger />
-    <Dialog.Portal>
+   
       <Dialog.Overlay />
       <Dialog.Content>
         <Dialog.Title />
@@ -33,7 +33,13 @@ const Modal: React.FC<ModalProps> = ({
   children,
 }) => {
   return (
-    <Dialog.Root></Dialog.Root>
+    <Dialog.Root open={isOpen} defaultOpen={isOpen} onOpenChange={onChange}>
+      {" "}
+      <Dialog.Portal>
+        <Dialog.Overlay className="bg-neutral-900/90 backdrop-blur-sm fixed inset-0" />
+        <Dialog.Content></Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 
